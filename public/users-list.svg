@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1100" height="760" viewBox="0 0 1100 760" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #f8fafc }
+    .card { fill: #ffffff; stroke: #e6eef7 }
+    .title { font: 700 20px/1.2 Inter, Arial, sans-serif; fill: #0f172a }
+    .small { font: 400 13px Inter, Arial, sans-serif; fill: #0f172a }
+    .muted { fill: #94a3b8 }
+    .btn { fill: #0ea5a4; cursor: pointer }
+    .btn-text { fill: #fff; font: 700 13px Inter }
+  </style>
+
+  <rect x="0" y="0" width="1100" height="760" class="bg" />
+
+  <!-- Header -->
+  <rect x="24" y="16" width="1052" height="64" rx="8" class="card" />
+  <text x="48" y="52" class="title">All users</text>
+  <text x="48" y="74" class="muted">List of users with basic metrics (click a user to see per-user analytics)</text>
+
+  <!-- Search bar and actions -->
+  <rect x="48" y="96" width="420" height="40" rx="8" fill="#ffffff" stroke="#eef2ff" />
+  <text x="64" y="122" class="muted">Search users or conversation_id</text>
+  <rect x="492" y="96" width="136" height="40" rx="8" class="btn" />
+  <text x="524" y="122" class="btn-text">Show analytics</text>
+  <rect x="644" y="96" width="136" height="40" rx="8" fill="#7c3aed" />
+  <text x="676" y="122" class="btn-text">Export users</text>
+
+  <!-- Users table header -->
+  <g transform="translate(48,156)">
+    <rect x="0" y="0" width="1004" height="520" rx="10" class="card" />
+    <text x="20" y="28" class="small">User</text>
+    <text x="300" y="28" class="small">Completed turns</text>
+    <text x="460" y="28" class="small">Conversations</text>
+    <text x="620" y="28" class="small">Last seen</text>
+    <text x="820" y="28" class="small">Actions</text>
+
+    <!-- rows -->
+    <g transform="translate(0,40)">
+      <rect x="16" y="8" width="972" height="56" rx="8" fill="#ffffff" stroke="#f1f5f9" />
+      <text x="36" y="44" class="small">Himanshu</text>
+      <text x="300" y="44" class="small">12</text>
+      <text x="460" y="44" class="small">3</text>
+      <text x="620" y="44" class="small">2025-09-24 07:37</text>
+      <rect x="788" y="16" width="200" height="40" rx="8" fill="#0ea5a4" />
+      <text x="844" y="42" class="btn-text">View analytics</text>
+
+      <rect x="16" y="80" width="972" height="56" rx="8" fill="#ffffff" stroke="#f1f5f9" />
+      <text x="36" y="116" class="small">Olivia</text>
+      <text x="300" y="116" class="small">8</text>
+      <text x="460" y="116" class="small">2</text>
+      <text x="620" y="116" class="small">2025-09-24 07:30</text>
+      <rect x="788" y="88" width="200" height="40" rx="8" fill="#0ea5a4" />
+      <text x="844" y="114" class="btn-text">View analytics</text>
+
+      <rect x="16" y="152" width="972" height="56" rx="8" fill="#ffffff" stroke="#f1f5f9" />
+      <text x="36" y="188" class="small">Carlos</text>
+      <text x="300" y="188" class="small">5</text>
+      <text x="460" y="188" class="small">1</text>
+      <text x="620" y="188" class="small">2025-09-23 21:10</text>
+      <rect x="788" y="160" width="200" height="40" rx="8" fill="#0ea5a4" />
+      <text x="844" y="186" class="btn-text">View analytics</text>
+
+      <!-- more rows would be paginated/scrollable in the real app -->
+    </g>
+  </g>
+
+  <!-- Footer note -->
+  <text x="48" y="700" class="muted">Analytics shown here are computed from `chat_turns` and exclude rows where `bot_response` is NULL.</text>
+</svg>

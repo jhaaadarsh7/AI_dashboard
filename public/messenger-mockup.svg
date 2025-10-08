@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #f0f2f5 }
+    .card { fill: #ffffff; stroke: #e6ecf5 }
+    .header { font: 700 18px/1.2 Arial, Helvetica, sans-serif; fill: #16202a }
+    .muted { fill: #6b7785 }
+    .contact { font: 700 13px Arial, Helvetica, sans-serif; fill: #0f172a }
+    .snippet { font: 400 12px Arial, Helvetica, sans-serif; fill: #475569 }
+    .time { font: 400 11px Arial, Helvetica, sans-serif; fill: #94a3b8 }
+    .bubble-user { fill: #0084ff; stroke: #006ad6 }
+    .bubble-user-text { fill: #ffffff; font: 400 13px Arial, Helvetica, sans-serif }
+    .bubble-bot { fill: #f1f3f5; stroke: #e2e6ea }
+    .bubble-bot-text { fill: #0f172a; font: 400 13px Arial, Helvetica, sans-serif }
+    .input { fill: #f5f7fa; stroke: #e6ecf5 }
+  </style>
+
+  <rect x="0" y="0" width="1200" height="800" class="bg" rx="0" />
+
+  <!-- Main frame -->
+  <rect x="40" y="40" width="1120" height="720" rx="12" class="card" />
+
+  <!-- Left column: contacts -->
+  <rect x="60" y="70" width="320" height="660" rx="10" fill="#ffffff" stroke="#e6ecf5" />
+  <text x="82" y="100" class="header">Contacts</text>
+  <text x="82" y="122" class="muted">Search or select a user</text>
+
+  <!-- Contact search box -->
+  <rect x="72" y="136" width="296" height="36" rx="8" class="input" />
+  <text x="86" y="160" class="muted">Search users</text>
+
+  <!-- Contact rows -->
+  <g transform="translate(72,188)">
+    <rect x="0" y="0" width="296" height="64" rx="8" fill="#fff" stroke="#f0f4f8" />
+    <circle cx="32" cy="32" r="18" fill="#06b6d4" />
+    <text x="62" y="36" class="contact">Himanshu</text>
+    <text x="62" y="54" class="snippet">how about any food?</text>
+    <text x="260" y="36" class="time">07:36</text>
+
+    <rect x="0" y="76" width="296" height="64" rx="8" fill="#fff" stroke="#f0f4f8" />
+    <circle cx="32" cy="32" r="18" fill="#7c3aed" transform="translate(0,76)" />
+    <text x="62" y="112" class="contact">Olivia</text>
+    <text x="62" y="130" class="snippet">Any vegan options?</text>
+    <text x="260" y="112" class="time">09:12</text>
+
+    <rect x="0" y="152" width="296" height="64" rx="8" fill="#fff" stroke="#f0f4f8" />
+    <circle cx="32" cy="32" r="18" fill="#f59e0b" transform="translate(0,152)" />
+    <text x="62" y="188" class="contact">Carlos</text>
+    <text x="62" y="206" class="snippet">Where is my order?</text>
+    <text x="260" y="188" class="time">Yesterday</text>
+  </g>
+
+  <!-- Right column: conversation area -->
+  <rect x="400" y="70" width="720" height="660" rx="10" fill="#ffffff" stroke="#e6ecf5" />
+
+  <!-- Conversation header -->
+  <text x="428" y="104" class="header">Himanshu</text>
+  <text x="428" y="126" class="muted">Active · Last seen 07:37</text>
+
+  <!-- Message area background -->
+  <rect x="428" y="144" width="664" height="512" rx="8" fill="#fbfdff" stroke="#f1f5f9" />
+
+  <!-- Bot message (left) -->
+  <g transform="translate(452,164)">
+    <rect x="0" y="0" width="420" height="64" rx="16" class="bubble-bot" />
+    <text x="20" y="38" class="bubble-bot-text">Bot: I found some gift items related to sweets, would you like to see options?</text>
+    <text x="400" y="16" class="time">07:36</text>
+  </g>
+
+  <!-- User message (right) -->
+  <g transform="translate(452,244)">
+    <rect x="244" y="0" width="420" height="56" rx="16" class="bubble-user" />
+    <text x="272" y="36" class="bubble-user-text">Himanshu: how about any food?</text>
+    <text x="688" y="20" class="time">07:36</text>
+  </g>
+
+  <!-- Bot message (left) -->
+  <g transform="translate(452,320)">
+    <rect x="0" y="0" width="420" height="76" rx="16" class="bubble-bot" />
+    <text x="20" y="42" class="bubble-bot-text">Bot: It seems I found some gift items related to sweets, but not specific beverages. If you're interested in our snacks or sweets, I can help with that!</text>
+    <text x="400" y="18" class="time">07:36</text>
+  </g>
+
+  <!-- User message (right) -->
+  <g transform="translate(452,412)">
+    <rect x="244" y="0" width="420" height="56" rx="16" class="bubble-user" />
+    <text x="272" y="36" class="bubble-user-text">Himanshu: Thank you</text>
+    <text x="688" y="20" class="time">07:37</text>
+  </g>
+
+  <!-- Unanswered example (left, highlighted) -->
+  <g transform="translate(452,488)">
+    <rect x="0" y="0" width="420" height="56" rx="16" fill="#fff7ed" stroke="#fde68a" />
+    <text x="20" y="36" class="bubble-bot-text" fill="#92400e">Bot: (no response) — Unanswered</text>
+    <text x="400" y="16" class="time">07:38</text>
+  </g>
+
+  <!-- Read-only input area (disabled) -->
+  <g transform="translate(428,672)">
+    <rect x="0" y="0" width="664" height="56" rx="12" class="input" />
+    <text x="20" y="36" class="muted">Read-only — admin cannot reply in this view</text>
+    <rect x="600" y="8" width="52" height="40" rx="8" fill="#e6ecf5" stroke="#dbe7f5" />
+    <text x="616" y="36" class="muted">Send</text>
+  </g>
+
+  <!-- Footer note -->
+  <text x="60" y="740" class="muted">Mockup: Facebook Messenger-like layout (contacts left, conversation right). Click a contact to view full conversation.</text>
+
+</svg>

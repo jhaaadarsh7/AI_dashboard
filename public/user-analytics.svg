@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="820" viewBox="0 0 1200 820" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #f8fafc }
+    .card { fill: #ffffff; stroke: #e6eef7 }
+    .title { font: 700 20px/1.2 Inter, Arial, sans-serif; fill: #0f172a }
+    .small { font: 400 13px Inter, Arial, sans-serif; fill: #0f172a }
+    .muted { fill: #94a3b8 }
+    .kpi-num { font: 700 24px Inter, Arial, sans-serif; fill: #0f172a }
+    .bar { fill: #06b6d4 }
+  </style>
+
+  <rect x="0" y="0" width="1200" height="820" class="bg" />
+
+  <!-- Header -->
+  <rect x="24" y="16" width="1152" height="64" rx="8" class="card" />
+  <text x="48" y="52" class="title">User analytics — Himanshu</text>
+  <text x="48" y="74" class="muted">Overview of metrics computed from `chat_turns` (bot_response not null)</text>
+
+  <!-- KPIs -->
+  <g transform="translate(24,100)">
+    <rect x="0" y="0" width="360" height="100" rx="10" class="card" />
+    <text x="24" y="40" class="kpi-num">12</text>
+    <text x="24" y="68" class="small">Total completed turns</text>
+
+    <rect x="392" y="0" width="360" height="100" rx="10" class="card" />
+    <text x="416" y="40" class="kpi-num">3</text>
+    <text x="416" y="68" class="small">Total conversations</text>
+
+    <rect x="784" y="0" width="360" height="100" rx="10" class="card" />
+    <text x="808" y="40" class="kpi-num">4</text>
+    <text x="808" y="68" class="small">Average turns / conversation</text>
+  </g>
+
+  <!-- Charts: messages per day (bar) and conversation length -->
+  <g transform="translate(24,220)">
+    <rect x="0" y="0" width="760" height="420" rx="10" class="card" />
+    <text x="24" y="36" class="small">Messages per day (30d)</text>
+    <rect x="24" y="56" width="712" height="336" rx="8" fill="#fbfdff" stroke="#eef6fb" />
+    <g transform="translate(40,60)">
+      <rect x="0" y="220" width="16" height="120" class="bar" rx="4" />
+      <rect x="24" y="200" width="16" height="140" class="bar" rx="4" />
+      <rect x="48" y="180" width="16" height="160" class="bar" rx="4" />
+      <rect x="72" y="160" width="16" height="180" class="bar" rx="4" />
+      <rect x="96" y="140" width="16" height="200" class="bar" rx="4" />
+      <rect x="120" y="180" width="16" height="160" class="bar" rx="4" />
+      <rect x="144" y="200" width="16" height="140" class="bar" rx="4" />
+    </g>
+  </g>
+
+  <g transform="translate(808,220)">
+    <rect x="0" y="0" width="360" height="220" rx="10" class="card" />
+    <text x="24" y="36" class="small">Conversation length</text>
+    <g transform="translate(24,56)">
+      <rect x="0" y="48" width="36" height="36" class="bar" rx="4" />
+      <text x="4" y="96" class="muted">1</text>
+      <rect x="56" y="28" width="36" height="56" class="bar" rx="4" />
+      <text x="60" y="96" class="muted">2-5</text>
+      <rect x="112" y="8" width="36" height="76" class="bar" rx="4" />
+      <text x="116" y="96" class="muted">6-10</text>
+    </g>
+
+    <rect x="0" y="236" width="360" height="56" rx="8" fill="#ffffff" stroke="#eef2ff" />
+    <text x="24" y="268" class="small">Last seen: 2025-09-24 07:37</text>
+
+    <rect x="0" y="300" width="360" height="56" rx="8" fill="#0ea5a4" />
+    <text x="104" y="332" font="700 13px Inter" fill="#fff">View chats</text>
+  </g>
+
+  <!-- Footer note -->
+  <text x="24" y="660" class="muted">Only analytics computed directly from `chat_turns` are shown: total completed turns, conversations, messages per day, conversation length. Rows with NULL `bot_response` are excluded.</text>
+
+</svg>
