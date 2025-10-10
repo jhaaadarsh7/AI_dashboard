@@ -206,8 +206,7 @@ export default function MessagesChart() {
   // Subscribe to realtime inserts and update chartDataState
   useEffect(() => {
     if (!isClient) return;
-    // @ts-ignore
-    const channel = supabase
+    const channel = (supabase as any)
       .channel('public:chat_turns')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_turns' }, (payload: any) => {
         try {
@@ -230,8 +229,7 @@ export default function MessagesChart() {
 
     return () => {
       try {
-        // @ts-ignore
-        channel.unsubscribe();
+        (channel as any).unsubscribe();
       } catch (e) {
         // best-effort
       }
@@ -239,57 +237,57 @@ export default function MessagesChart() {
   }, [isClient]);
 
   return (
-    <Card className="border border-gray-200 shadow-sm bg-white">
-      <CardHeader className="pb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 rounded-lg">
-              <BarChart3 className="h-5 w-5 text-gray-700" />
+    <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-200">
+      <CardHeader className="pb-4 sm:pb-6 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg">
+              <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900">
                 Daily Message Volume
               </CardTitle>
-              <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                <Calendar className="h-4 w-4" />
+              <p className="text-sm sm:text-base text-gray-500 flex items-center gap-2 mt-1">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
                 Last 30 days
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-sm text-gray-500">Daily Average</div>
-              <div className="text-xl font-semibold text-gray-900">{avgChats}</div>
+          <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
+            <div className="text-left sm:text-right">
+              <div className="text-sm sm:text-base text-gray-500">Daily Average</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">{avgChats}</div>
             </div>
-            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-              <Filter className="h-4 w-4" />
+            <button className="p-2 sm:p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl transition-all duration-200 hover:shadow-md">
+              <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         </div>
       </CardHeader>
       
-      <CardContent>
-        <div className="relative h-80 w-full">
+      <CardContent className="p-4 sm:p-6 lg:p-8 pt-0">
+        <div className="relative h-64 sm:h-80 lg:h-96 w-full bg-gradient-to-b from-gray-50/50 to-transparent rounded-xl">
           {isClient ? (
             <canvas 
               ref={chartRef}
-              className="w-full h-full"
+              className="w-full h-full rounded-xl"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg">
-              <div className="text-gray-500 text-sm">Loading chart...</div>
+              <div className="text-gray-500 text-xs sm:text-sm">Loading chart...</div>
             </div>
           )}
         </div>
         
         {/* Chart summary */}
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-          <div className="text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100">
+          <div className="text-xs sm:text-sm text-gray-500">
             Tracking daily conversation volume across the platform
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-blue-500"></div>
               <span className="text-gray-600">Messages</span>
             </div>
           </div>

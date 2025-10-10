@@ -170,39 +170,44 @@ export default async function KPIs() {
   const messages30d = last30Res.error ? null : last30Res.count;
 
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
           <CardTitle className="text-sm font-medium text-blue-100">Total Chats</CardTitle>
-          <div className="p-2 bg-white/20 rounded-lg">
-            <MessageSquare className="h-5 w-5 text-white" />
+          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+            <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">{totalMessages ?? '—'}</div>
+        <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+          <div className="text-2xl sm:text-3xl font-bold">{totalMessages ?? '—'}</div>
+          <p className="text-xs sm:text-sm text-blue-100 mt-1">All conversations</p>
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
           <CardTitle className="text-sm font-medium text-emerald-100">Total Users</CardTitle>
-          <div className="p-2 bg-white/20 rounded-lg">
-            <Users className="h-5 w-5 text-white" />
+          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">{totalUsers ?? '—'}</div>
+        <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+          <div className="text-2xl sm:text-3xl font-bold">{totalUsers ?? '—'}</div>
+          <p className="text-xs sm:text-sm text-emerald-100 mt-1">Unique conversations</p>
           {/* growth removed per user request */}
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:shadow-xl transition-all duration-200 transform hover:scale-105 sm:col-span-2 lg:col-span-1">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
           <CardTitle className="text-sm font-medium text-purple-100">Messages (30d)</CardTitle>
-          <div className="p-2 bg-white/20 rounded-lg" />
+          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+            <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold">{messages30d ?? '—'}</div>
+        <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+          <div className="text-2xl sm:text-3xl font-bold">{messages30d ?? '—'}</div>
+          <p className="text-xs sm:text-sm text-purple-100 mt-1">Recent activity</p>
         </CardContent>
       </Card>
     </div>
