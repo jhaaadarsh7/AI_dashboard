@@ -342,7 +342,6 @@ export default function UsersPage() {
                   className="bg-white/70 backdrop-blur-sm border-gray-200 hover:bg-white hover:shadow-md transition-all duration-200 group-hover:scale-105"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-0.5 transition-transform duration-200" />
-                  <span className="hidden sm:inline">Back to Dashboard</span>
                   <span className="sm:hidden">Back</span>
                 </Button>
               </Link>

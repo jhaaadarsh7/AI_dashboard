@@ -155,7 +155,7 @@ export default async function RecentConversations() {
 
   return (
     <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-200">
-      <CardHeader className="pb-3 sm:pb-4 p-4 sm:p-6 lg:p-8">
+      <CardHeader className="pb-2 p-4 sm:p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="p-2 sm:p-3 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl shadow-lg">
@@ -165,7 +165,7 @@ export default async function RecentConversations() {
               <CardTitle className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 Recent Conversations
               </CardTitle>
-              <p className="text-sm sm:text-base text-gray-500 flex items-center gap-2 mt-1">
+              <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
                 <User className="h-4 w-4" />
                 Latest user messages
               </p>
@@ -173,53 +173,55 @@ export default async function RecentConversations() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 lg:p-8 pt-0">{rows.length === 0 ? (
+      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0">{rows.length === 0 ? (
           <div className="text-sm sm:text-base text-gray-500 text-center py-8 px-4 bg-gray-50/50 rounded-xl">
             <MessageCircle className="h-8 w-8 text-gray-300 mx-auto mb-3" />
             <p>No recent conversations found.</p>
           </div>
         ) : (
-          rows.map((row) => (
-            <Link key={row.conversation_id} href={`/users/${encodeURIComponent(row.conversation_id)}`} className="block">
-              <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 cursor-pointer border border-gray-100 hover:border-blue-200 hover:shadow-md group">
-                <Avatar className="h-10 w-10 sm:h-12 sm:w-12 ring-2 ring-white shadow-lg flex-shrink-0 group-hover:ring-4 group-hover:ring-blue-100 transition-all duration-200">
-                  <AvatarFallback className={`text-white text-sm sm:text-base font-semibold bg-gradient-to-br from-blue-400 to-blue-600 group-hover:scale-110 transition-transform duration-200`}>
-                    {String(row.user_name || row.conversation_id).slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-2 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex flex-col gap-1 min-w-0 flex-1">
-                      <p className="text-sm sm:text-base font-semibold text-gray-800 truncate group-hover:text-blue-600 transition-colors duration-200">{row.user_name ?? 'Anonymous'}</p>
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 border border-indigo-200 truncate max-w-[140px] sm:max-w-none hover:bg-gradient-to-r hover:from-indigo-200 hover:to-purple-200 transition-all duration-200">
-                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
-                          <span className="truncate">{row.conversation_id}</span>
-                        </span>
+          <div className="space-y-3">
+            {rows.map((row) => (
+              <Link key={row.conversation_id} href={`/users/${encodeURIComponent(row.conversation_id)}`} className="block">
+                <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 cursor-pointer border border-gray-100 hover:border-blue-200 hover:shadow-md group">
+                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 ring-2 ring-white shadow-lg flex-shrink-0 group-hover:ring-4 group-hover:ring-blue-100 transition-all duration-200">
+                    <AvatarFallback className={`text-white text-sm sm:text-base font-semibold bg-gradient-to-br from-blue-400 to-blue-600 group-hover:scale-110 transition-transform duration-200`}>
+                      {String(row.user_name || row.conversation_id).slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 space-y-2 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-col gap-1 min-w-0 flex-1">
+                        <p className="text-sm sm:text-base font-semibold text-gray-800 truncate group-hover:text-blue-600 transition-colors duration-200">{row.user_name ?? 'Anonymous'}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 border border-indigo-200 hover:bg-gradient-to-r hover:from-indigo-200 hover:to-purple-200 transition-all duration-200 whitespace-nowrap">
+                            <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="font-mono">{row.conversation_id}</span>
+                          </span>
+                        </div>
                       </div>
+                      <p className="text-xs sm:text-sm text-gray-400 flex items-center gap-1 flex-shrink-0">
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">{formatAgo(row.timestamp)}</span>
+                        <span className="sm:hidden">{formatAgo(row.timestamp)?.split(' ')[0]}</span>
+                      </p>
                     </div>
-                    <p className="text-xs sm:text-sm text-gray-400 flex items-center gap-1 flex-shrink-0">
-                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span className="hidden sm:inline">{formatAgo(row.timestamp)}</span>
-                      <span className="sm:hidden">{formatAgo(row.timestamp)?.split(' ')[0]}</span>
-                    </p>
+                    <p className="text-sm sm:text-base text-gray-600 line-clamp-2 leading-relaxed group-hover:text-gray-700 transition-colors duration-200">{row.message ?? 'No message content'}</p>
                   </div>
-                  <p className="text-sm sm:text-base text-gray-600 line-clamp-2 leading-relaxed group-hover:text-gray-700 transition-colors duration-200">{row.message ?? 'No message content'}</p>
                 </div>
-              </div>
-            </Link>
-          ))
-        )}
+              </Link>
+            ))}
 
-        <div className="pt-4">
-          <Link href="/users">
-            <Button variant="outline" className="w-full gap-2 border-dashed border-2 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 hover:border-solid hover:border-indigo-300 text-sm sm:text-base py-3 transition-all duration-200">
-              <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="hidden sm:inline">View All Conversations</span>
-              <span className="sm:hidden">View All</span>
-            </Button>
-          </Link>
-        </div>
+            <div className="pt-4 border-t border-gray-100">
+              <Link href="/users">
+                <Button variant="outline" className="w-full gap-2 border-dashed border-2 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 hover:border-solid hover:border-indigo-300 text-sm sm:text-base py-3 transition-all duration-200">
+                  <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">View All Conversations</span>
+                  <span className="sm:hidden">View All</span>
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
