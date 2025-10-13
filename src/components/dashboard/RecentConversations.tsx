@@ -69,36 +69,72 @@ async function fetchRecentConversations(limit = 4): Promise<RecentRow[]> {
     console.warn('Postgres check failed, proceeding to fallback:', serializeError(err));
   }
 
-  // Fallback: use PostgREST to fetch recent rows, prefer ordering by timestamp but
-  // gracefully retry without ordering if timestamp doesn't exist.
+  // Fallback: use PostgREST to fetch recent rows ordered by timestamp (newest first).
+  // Important: do NOT filter out rows without `bot_response` here so newly-created
+  // conversations (that may not have a bot response yet) are included.
   let rows: any[] = [];
   try {
-  const { data, error } = await supabase.from('chat_turns').select('id,conversation_id,user_name,user_message,bot_response,timestamp').not('bot_response', 'is', null).order('timestamp', { ascending: false }).limit(limit * 3);
+    // fetch a larger window to ensure we get the most recent conversations even after dedupe
+    const window = Math.max(limit * 20, 50);
+    const { data, error } = await supabase
+      .from('chat_turns')
+      .select('id,conversation_id,user_name,user_message,bot_response,timestamp')
+      .order('timestamp', { ascending: false })
+      .limit(window);
     if (error) throw error;
     rows = (data || []) as any[];
   } catch (err) {
-    // If timestamp column is missing or order failed, retry without ordering
+    // If timestamp fetch fails, retry without ordering and still avoid filtering so
+    // we include fresh conversations. Also try ordering by `id` if timestamps are absent.
     const errStr = serializeError(err);
     console.warn('PostgREST ordered fetch failed, retrying without order:', errStr);
     try {
-  const { data, error } = await supabase.from('chat_turns').select('id,conversation_id,user_name,user_message,bot_response,timestamp').not('bot_response', 'is', null).limit(limit * 3);
+      const { data, error } = await supabase
+        .from('chat_turns')
+        .select('id,conversation_id,user_name,user_message,bot_response,timestamp')
+        .limit(Math.max(limit * 50, 100));
       if (error) throw error;
       rows = (data || []) as any[];
     } catch (err2) {
       console.error('Error fetching recent conversations (PostgREST fallback):', serializeError(err2), err2);
-      return [];
+      // final fallback: try ordering by id descending to capture newly-created rows without timestamps
+      try {
+        const { data: idData, error: idErr } = await supabase
+          .from('chat_turns')
+          .select('id,conversation_id,user_name,user_message,bot_response,timestamp')
+          .order('id', { ascending: false })
+          .limit(Math.max(limit * 50, 100));
+        if (!idErr) rows = (idData || []) as any[];
+      } catch (finalErr) {
+        console.error('Final fallback failed:', serializeError(finalErr), finalErr);
+        return [];
+      }
     }
   }
 
-  // Deduplicate by conversation_id, keeping the first occurrence (which will be the most recent if ordered)
+  // If the primary timestamp-ordered query returned rows with no timestamps (some DBs
+  // may have null timestamp for recent inserts), try a quick id-desc fallback to ensure
+  // newly-created conversations are included.
+  if (!rows || rows.length === 0 || rows.every((r) => !r.timestamp)) {
+    try {
+      const { data: idData, error: idErr } = await supabase
+        .from('chat_turns')
+        .select('id,conversation_id,user_name,user_message,bot_response,timestamp')
+        .order('id', { ascending: false })
+        .limit(Math.max(limit * 20, 50));
+      if (!idErr) rows = (idData || []) as any[];
+    } catch (e) {
+      // ignore — we'll proceed with whatever rows we have
+    }
+  }
+
+  // Deduplicate by conversation_id, keeping the first occurrence (rows are fetched newest-first).
   try {
     const seen = new Set<string>();
     const out: RecentRow[] = [];
     for (const r of rows) {
       const cid = r.conversation_id;
       if (!cid) continue;
-      // ensure we only include rows where bot_response exists
-      if (r.bot_response == null) continue;
       const key = String(cid);
       if (seen.has(key)) continue;
       seen.add(key);
@@ -109,6 +145,7 @@ async function fetchRecentConversations(limit = 4): Promise<RecentRow[]> {
         // map DB column user_message to our message field
         message: (r.user_message ?? r.message) ?? null,
         timestamp: r.timestamp ?? null,
+        hasBotResponse: r.bot_response != null,
       });
       if (out.length >= limit) break;
     }
