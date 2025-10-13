@@ -128,59 +128,55 @@ async function fetchRecentConversations(limit = 4): Promise<RecentRow[]> {
     }
   }
 
-  // Deduplicate by conversation_id, keeping the first occurrence (rows are fetched newest-first).
+  // Aggregate rows by conversation_id and keep the most recent row per conversation
+  // (compare by timestamp when available, otherwise fall back to id). Then sort
+  // aggregated conversations by their latest activity (newest first) and return
+  // the top `limit` items.
   try {
-    const seen = new Set<string>();
-    const out: RecentRow[] = [];
+    const convMap = new Map<string, RecentRow>();
+
     for (const r of rows) {
       const cid = r.conversation_id;
       if (!cid) continue;
       const key = String(cid);
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push({
-        id: r.id ?? out.length,
-        conversation_id: key,
-        user_name: r.user_name ?? null,
-        // map DB column user_message to our message field
-        message: (r.user_message ?? r.message) ?? null,
-        timestamp: r.timestamp ?? null,
-        hasBotResponse: r.bot_response != null,
-      });
-      if (out.length >= limit) break;
-    }
-    // If we didn't reach the requested limit, fetch additional recent conversations
-    // without requiring bot_response and fill the list (deduping by conversation_id).
-    if (out.length < limit) {
-      try {
-        const { data: moreData, error: moreErr } = await supabase
-          .from('chat_turns')
-          .select('id,conversation_id,user_name,user_message,bot_response,timestamp')
-          .order('timestamp', { ascending: false })
-          .limit(limit * 10);
-        if (!moreErr && Array.isArray(moreData)) {
-          for (const r of moreData) {
-            const cid = r.conversation_id;
-            if (!cid) continue;
-            const key = String(cid);
-            if (seen.has(key)) continue;
-            seen.add(key);
-            out.push({
-                  id: r.id ?? out.length,
-                  conversation_id: key,
-                  user_name: r.user_name ?? null,
-                  message: (r.user_message) ?? null,
-                  timestamp: r.timestamp ?? null,
-                  hasBotResponse: r.bot_response != null,
-                });
-            if (out.length >= limit) break;
-          }
+
+      // Determine row's comparable time: prefer timestamp, else id (as a fallback)
+      const ts = r.timestamp ? new Date(r.timestamp).getTime() : (typeof r.id === 'number' ? r.id : Number(r.id) || 0);
+
+      const existing = convMap.get(key);
+      if (!existing) {
+        convMap.set(key, {
+          id: r.id ?? 0,
+          conversation_id: key,
+          user_name: r.user_name ?? null,
+          message: (r.user_message ?? r.message) ?? null,
+          timestamp: r.timestamp ?? null,
+          hasBotResponse: r.bot_response != null,
+        });
+      } else {
+        const existingTs = existing.timestamp ? new Date(existing.timestamp).getTime() : (existing.id ?? 0);
+        if (ts > existingTs) {
+          convMap.set(key, {
+            id: r.id ?? existing.id,
+            conversation_id: key,
+            user_name: r.user_name ?? existing.user_name,
+            message: (r.user_message ?? r.message) ?? existing.message,
+            timestamp: r.timestamp ?? existing.timestamp,
+            hasBotResponse: r.bot_response != null,
+          });
         }
-      } catch (e) {
-        // ignore fill errors
       }
     }
-    return out;
+
+    // Convert to array and sort by latest activity (timestamp or id)
+    const aggregated = Array.from(convMap.values()).sort((a, b) => {
+      const ta = a.timestamp ? new Date(a.timestamp).getTime() : (a.id ?? 0);
+      const tb = b.timestamp ? new Date(b.timestamp).getTime() : (b.id ?? 0);
+      return tb - ta;
+    });
+
+    // Return the top `limit` conversations
+    return aggregated.slice(0, limit);
   } catch (err) {
     console.error('Error processing recent conversations rows:', serializeError(err), err);
     return [];
