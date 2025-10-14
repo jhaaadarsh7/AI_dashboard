@@ -1,4 +1,5 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -33,6 +34,12 @@ function formatAgo(ts?: string | null) {
 }
 
 async function fetchRecentConversations(limit = 4): Promise<RecentRow[]> {
+  // Check if Supabase is properly configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.error('Supabase environment variables not configured');
+    return [];
+  }
+
   const serializeError = (err: any) => {
     try {
       if (err == null) return String(err);
@@ -183,8 +190,32 @@ async function fetchRecentConversations(limit = 4): Promise<RecentRow[]> {
   }
 }
 
-export default async function RecentConversations() {
-  const rows = await fetchRecentConversations(5);
+export default function RecentConversations() {
+  const [rows, setRows] = useState<RecentRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // Check if environment variables are available
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+          console.error('Supabase environment variables not configured');
+          setLoading(false);
+          return;
+        }
+
+        const conversations = await fetchRecentConversations(5);
+        setRows(conversations);
+      } catch (error) {
+        console.error('Error loading recent conversations:', error);
+        setRows([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
 
   return (
     <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-200">
@@ -206,7 +237,12 @@ export default async function RecentConversations() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0">{rows.length === 0 ? (
+      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0">{loading ? (
+          <div className="text-sm sm:text-base text-gray-500 text-center py-8 px-4 bg-gray-50/50 rounded-xl">
+            <MessageCircle className="h-8 w-8 text-gray-300 mx-auto mb-3 animate-pulse" />
+            <p>Loading recent conversations...</p>
+          </div>
+        ) : rows.length === 0 ? (
           <div className="text-sm sm:text-base text-gray-500 text-center py-8 px-4 bg-gray-50/50 rounded-xl">
             <MessageCircle className="h-8 w-8 text-gray-300 mx-auto mb-3" />
             <p>No recent conversations found.</p>

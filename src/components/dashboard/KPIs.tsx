@@ -1,4 +1,5 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageSquare, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
@@ -7,12 +8,20 @@ type ChatRow = { conversation_id: string | number };
 
 
 async function fetchTotalUsers() {
+  // Check if Supabase is properly configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.error('Supabase not configured');
+    return { count: 0, error: 'Supabase not configured' };
+  }
+
   // Prefer a server-side COUNT(DISTINCT) SQL query for accuracy and performance.
   try {
-    // @ts-ignore
+    // @ts-ignore - Note: postgres.query may not be available in all Supabase deployments
     if (supabase.postgres && typeof supabase.postgres.query === 'function') {
-  // @ts-ignore
-  const sqlRes = await supabase.postgres.query({ query: `SELECT COUNT(DISTINCT conversation_id) AS cnt FROM chat_turns WHERE bot_response IS NOT NULL` });
+      // @ts-ignore
+      const sqlRes = await supabase.postgres.query({ 
+        query: `SELECT COUNT(DISTINCT conversation_id) AS cnt FROM chat_turns WHERE conversation_id IS NOT NULL` 
+      });
       // @ts-ignore
       const row = sqlRes?.data?.[0];
       const raw = row ? (row.cnt ?? Object.values(row)[0]) : undefined;
@@ -24,7 +33,7 @@ async function fetchTotalUsers() {
   }
 
   // Fallback: fetch conversation_id rows and deduplicate in Node.
-  const { data, error } = await supabase.from('chat_turns').select('conversation_id').not('bot_response', 'is', null);
+  const { data, error } = await supabase.from('chat_turns').select('conversation_id').not('conversation_id', 'is', null);
   if (error) {
     console.error('Supabase error fetching chat_turns', error);
     return { count: 0, error };
@@ -43,12 +52,19 @@ async function fetchTotalUsers() {
 
 
 async function fetchTotalMessages() {
+  // Check if Supabase is properly configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return { count: 0, error: 'Supabase not configured' };
+  }
+
   // Prefer server-side SQL COUNT(*) for total messages where conversation_id IS NOT NULL
   try {
     // @ts-ignore
     if (supabase.postgres && typeof supabase.postgres.query === 'function') {
-  // @ts-ignore
-  const sqlRes = await supabase.postgres.query({ query: `SELECT COUNT(*) AS cnt FROM chat_turns WHERE conversation_id IS NOT NULL AND bot_response IS NOT NULL` });
+      // @ts-ignore
+      const sqlRes = await supabase.postgres.query({ 
+        query: `SELECT COUNT(*) AS cnt FROM chat_turns WHERE conversation_id IS NOT NULL AND bot_response IS NOT NULL` 
+      });
       // @ts-ignore
       const row = sqlRes?.data?.[0];
       const raw = row ? (row.cnt ?? Object.values(row)[0]) : undefined;
@@ -75,13 +91,18 @@ async function fetchTotalMessages() {
 }
 
 async function fetchMessagesLast30Days() {
+  // Check if Supabase is properly configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return { count: 0, error: 'Supabase not configured' };
+  }
+
   // Primary: run the exact SQL the user provided, using `timestamp` column.
   try {
     // Prefer explicit SQL using supabase.postgres.query
     // @ts-ignore
     if (supabase.postgres && typeof supabase.postgres.query === 'function') {
-  // @ts-ignore
-  const sql = `SELECT COUNT(conversation_id) AS total_conversations_last_30_days FROM chat_turns WHERE conversation_id IS NOT NULL AND bot_response IS NOT NULL AND timestamp >= NOW() - INTERVAL '30 days'`;
+      // @ts-ignore
+      const sql = `SELECT COUNT(conversation_id) AS total_conversations_last_30_days FROM chat_turns WHERE conversation_id IS NOT NULL AND bot_response IS NOT NULL AND timestamp >= NOW() - INTERVAL '30 days'`;
       // @ts-ignore
       const sqlRes = await supabase.postgres.query({ query: sql });
       // @ts-ignore
@@ -93,7 +114,6 @@ async function fetchMessagesLast30Days() {
     }
   } catch (err) {
     // SQL attempt failed (maybe column doesn't exist or API missing) — fall through to fallbacks
-    // eslint-disable-next-line no-console
     console.warn('SQL 30d query failed:', String(err));
   }
 
@@ -156,18 +176,69 @@ async function fetchMessagesLast30Days() {
 
 // growth calculation removed per user request
 
-export default async function KPIs() {
-  // total distinct users (all time)
-  const totalRes = await fetchTotalUsers();
-  const totalUsers = totalRes.error ? null : totalRes.count;
+export default function KPIs() {
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+  const [totalMessages, setTotalMessages] = useState<number | null>(null);
+  const [messages30d, setMessages30d] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // total messages
-  const totalMsgRes = await fetchTotalMessages();
-  const totalMessages = totalMsgRes.error ? null : totalMsgRes.count;
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // Check if environment variables are available
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+          console.error('Supabase environment variables not configured');
+          setLoading(false);
+          return;
+        }
 
-  // messages in last 30 days
-  const last30Res = await fetchMessagesLast30Days();
-  const messages30d = last30Res.error ? null : last30Res.count;
+        // Load all data concurrently with timeout
+        const timeout = 10000; // 10 second timeout
+        const promises = [
+          Promise.race([
+            fetchTotalUsers(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+          ]),
+          Promise.race([
+            fetchTotalMessages(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+          ]),
+          Promise.race([
+            fetchMessagesLast30Days(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+          ])
+        ];
+
+        const [totalRes, totalMsgRes, last30Res] = await Promise.allSettled(promises);
+
+        // Set results with error handling
+        if (totalRes.status === 'fulfilled') {
+          const value = totalRes.value as { count: number; error?: any };
+          if (!value.error) {
+            setTotalUsers(value.count);
+          }
+        }
+        if (totalMsgRes.status === 'fulfilled') {
+          const value = totalMsgRes.value as { count: number; error?: any };
+          if (!value.error) {
+            setTotalMessages(value.count);
+          }
+        }
+        if (last30Res.status === 'fulfilled') {
+          const value = last30Res.value as { count: number; error?: any };
+          if (!value.error) {
+            setMessages30d(value.count);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading KPI data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
 
   return (
     <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -179,7 +250,9 @@ export default async function KPIs() {
           </div>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-          <div className="text-2xl sm:text-3xl font-bold">{totalMessages ?? '—'}</div>
+          <div className="text-2xl sm:text-3xl font-bold">
+            {loading ? '...' : totalMessages ?? '—'}
+          </div>
           <p className="text-xs sm:text-sm text-blue-100 mt-1">All conversations</p>
         </CardContent>
       </Card>
@@ -192,7 +265,9 @@ export default async function KPIs() {
           </div>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-          <div className="text-2xl sm:text-3xl font-bold">{totalUsers ?? '—'}</div>
+          <div className="text-2xl sm:text-3xl font-bold">
+            {loading ? '...' : totalUsers ?? '—'}
+          </div>
           <p className="text-xs sm:text-sm text-emerald-100 mt-1">Unique conversations</p>
           {/* growth removed per user request */}
         </CardContent>
@@ -206,7 +281,9 @@ export default async function KPIs() {
           </div>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-          <div className="text-2xl sm:text-3xl font-bold">{messages30d ?? '—'}</div>
+          <div className="text-2xl sm:text-3xl font-bold">
+            {loading ? '...' : messages30d ?? '—'}
+          </div>
           <p className="text-xs sm:text-sm text-purple-100 mt-1">Recent activity</p>
         </CardContent>
       </Card>
